@@ -18,3 +18,12 @@ lint:
 
 lint-fix:
 	uv run ruff check gendiff --fix
+	
+test:
+	uv run pytest
+
+test-coverage:
+	uv run pytest --cov=hexlet_python_package --cov-report xml
+	
+check: 
+	test lint
