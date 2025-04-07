@@ -12,3 +12,9 @@ uninstall:
 
 gendiff:
 	uv run gendiff
+
+lint:
+	uv run ruff check gendiff
+
+lint-fix:
+	uv run ruff check gendiff --fix

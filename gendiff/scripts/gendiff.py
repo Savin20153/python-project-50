@@ -1,5 +1,5 @@
-from gendiff.get_files import get_files
 from gendiff.generate_diff import generate_diff
+from gendiff.get_files import get_files
 
 
 def main():
