@@ -1,15 +1,10 @@
-from gendiff.generate_diff import generate_diff
-from gendiff.get_files import get_files
-
+from gendiff.cli import parse_args
+from gendiff.generator import generate_diff
 
 def main():
-    first_file, second_file = get_files()
-    diff = generate_diff(first_file, second_file)
-    print('{')
-    for key, value in diff.items():
-        print(f'    {key}: {value}')
-    print('}')
+    file1, file2, format_name = parse_args()
+    result = generate_diff(file1, file2, format_name)
+    print(result)
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
