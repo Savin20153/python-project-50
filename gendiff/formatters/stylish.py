@@ -1,22 +1,42 @@
 def format_stylish(diff, indent=0):
     lines = []
     space = '    ' * indent
-    
+
     for key, node in diff.items():
-        node_type = node['type']
-        
+        node_type = node.get('type')
+
         if node_type == 'nested':
             lines.append(f"{space}    {key}: {{")
-            lines.append(format_stylish(node['value'], indent + 1))
+            lines.append(format_stylish(node['children'], indent + 1))
             lines.append(f"{space}    }}")
         elif node_type == 'changed':
-            lines.append(f"{space}  - {key}: {node['old']}")
-            lines.append(f"{space}  + {key}: {node['new']}")
+            old = stringify(node['old_value'], indent + 1)
+            new = stringify(node['new_value'], indent + 1)
+            lines.append(f"{space}  - {key}: {old}")
+            lines.append(f"{space}  + {key}: {new}")
         elif node_type == 'unchanged':
-            lines.append(f"{space}    {key}: {node['value']}")
+            val = stringify(node['value'], indent + 1)
+            lines.append(f"{space}    {key}: {val}")
         elif node_type == 'added':
-            lines.append(f"{space}  + {key}: {node['value']}")
+            val = stringify(node['value'], indent + 1)
+            lines.append(f"{space}  + {key}: {val}")
         elif node_type == 'removed':
-            lines.append(f"{space}  - {key}: {node['value']}")
-    
+            val = stringify(node['value'], indent + 1)
+            lines.append(f"{space}  - {key}: {val}")
+
     return '\n'.join(lines)
+
+
+def stringify(value, indent):
+    if isinstance(value, dict):
+        lines = ['{']
+        inner_space = '    ' * indent
+        for k, v in value.items():
+            lines.append(f"{inner_space}    {k}: {stringify(v, indent + 1)}")
+        lines.append(f"{'    ' * (indent - 1)}    }}")
+        return '\n'.join(lines)
+    elif isinstance(value, bool):
+        return str(value).lower()
+    elif value is None:
+        return 'null'
+    return str(value)
