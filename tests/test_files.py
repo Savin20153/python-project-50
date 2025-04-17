@@ -1,51 +1,40 @@
-import json
-import yaml
-from pathlib import Path
+import os
+import pytest
 from gendiff.generator import generate_diff
 
-def format_diff(diff):
-    lines = []
-    for key in sorted(diff.keys(), key=lambda x: x[2:] if x[0] in '+-' else x.strip()):
-        lines.append(f" {key}: {json.dumps(diff[key])}")
-    return "{\n" + "\n".join(lines) + "\n}"
+TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), 'test_data')
 
-def load_file(file_path):
-    file_path_str = str(file_path) 
-    if file_path_str.endswith('.json'):
-        with open(file_path) as f:
-            return json.load(f)
-    elif file_path_str.endswith('.yml') or file_path_str.endswith('.yaml'):
-       with open(file_path) as f:
-          return yaml.safe_load(f)
-    else:
-        raise ValueError("Unsupported file format")
+FILE1_JSON = os.path.join(TEST_DATA_DIR, 'file1.json')
+FILE2_JSON = os.path.join(TEST_DATA_DIR, 'file2.json')
+FILE1_YML = os.path.join(TEST_DATA_DIR, 'file1.yml')
+FILE2_YML = os.path.join(TEST_DATA_DIR, 'file2.yml')
 
-def test_generate_diff_json():
-    base_path = Path(__file__).parent / 'test_data'
-    file1 = load_file(base_path / 'file1.json')
-    file2 = load_file(base_path / 'file2.json')
-    with open(base_path / 'expected_output_stylish.txt') as expected_file:
-        expected_output = expected_file.read().strip()
-    diff_result = generate_diff(file1, file2)
-    formatted_diff = format_diff(diff_result)
-    assert formatted_diff == expected_output
+EXPECTED_STYLISH = os.path.join(TEST_DATA_DIR, 'expected_output_stylish.txt')
+EXPECTED_PLAIN = os.path.join(TEST_DATA_DIR, 'expected_output_plain.txt')
+EXPECTED_JSON = os.path.join(TEST_DATA_DIR, 'expected_output_json.txt')
 
-def test_generate_diff_yml():
-    base_path = Path(__file__).parent / 'test_data'
-    file1 = load_file(base_path / 'file1.yml')
-    file2 = load_file(base_path / 'file2.yml')
-    with open(base_path / 'expected_output_stylish.txt') as expected_file:
-        expected_output = expected_file.read().strip()
-    diff_result = generate_diff(file1, file2)
-    formatted_diff = format_diff(diff_result)
-    assert formatted_diff == expected_output
+def read_file(file_path):
+    with open(file_path, 'r') as f:
+        return f.read().strip()
 
-def test_generate_diff_mixed():
-    base_path = Path(__file__).parent / 'test_data'
-    file1 = load_file(base_path / 'file1.json')
-    file2 = load_file(base_path / 'file2.yml')
-    with open(base_path / 'expected_output_stylish.txt') as expected_file:
-        expected_output = expected_file.read().strip()
-    diff_result = generate_diff(file1, file2)
-    formatted_diff = format_diff(diff_result)
-    assert formatted_diff == expected_output
+def normalize(text):
+    """Удаляет лишние пробелы и переносы строк для сравнения."""
+    return '\n'.join(line.strip() for line in text.splitlines() if line.strip())
+
+@pytest.mark.parametrize("file1, file2, expected_output, format_name", [
+    (FILE1_JSON, FILE2_JSON, EXPECTED_STYLISH, 'stylish'),
+    (FILE1_YML, FILE2_YML, EXPECTED_STYLISH, 'stylish'),
+    (FILE1_JSON, FILE2_JSON, EXPECTED_PLAIN, 'plain'),
+    (FILE1_YML, FILE2_YML, EXPECTED_PLAIN, 'plain'),
+    (FILE1_JSON, FILE2_JSON, EXPECTED_JSON, 'json'),
+    (FILE1_YML, FILE2_YML, EXPECTED_JSON, 'json'),
+])
+def test_gendiff(file1, file2, expected_output, format_name):
+    expected = normalize(read_file(expected_output))
+    result = normalize(generate_diff(file1, file2, format_name))
+    assert result == expected, (
+        f"Формат: {format_name}\n"
+        f"Файлы: {file1}, {file2}\n"
+        f"Ожидаемый вывод:\n{expected}\n"
+        f"Фактический вывод:\n{result}"
+    )
