@@ -35,4 +35,4 @@ Output formats:
 
 ## Example of work
 
-[![asciicast](https://asciinema.org/a/dK1DOR9Uxk0KZBELTXcDGGtfC.svg)](https://asciinema.org/a/dK1DOR9Uxk0KZBELTXcDGGtfC)
+[![asciicast](https://asciinema.org/a/4UaUMmKJi6eCkopVmq2BE1BDc.svg)](https://asciinema.org/a/4UaUMmKJi6eCkopVmq2BE1BDc)
