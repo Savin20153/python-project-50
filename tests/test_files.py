@@ -1,40 +1,42 @@
-import os
 import pytest
+import json
+import os
 from gendiff.generator import generate_diff
 
-TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), 'test_data')
+def get_path(filename):
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(current_dir, 'test_data', filename)
 
-FILE1_JSON = os.path.join(TEST_DATA_DIR, 'file1.json')
-FILE2_JSON = os.path.join(TEST_DATA_DIR, 'file2.json')
-FILE1_YML = os.path.join(TEST_DATA_DIR, 'file1.yml')
-FILE2_YML = os.path.join(TEST_DATA_DIR, 'file2.yml')
-
-EXPECTED_STYLISH = os.path.join(TEST_DATA_DIR, 'expected_output_stylish.txt')
-EXPECTED_PLAIN = os.path.join(TEST_DATA_DIR, 'expected_output_plain.txt')
-EXPECTED_JSON = os.path.join(TEST_DATA_DIR, 'expected_output_json.txt')
-
-def read_file(file_path):
-    with open(file_path, 'r') as f:
+def read_file(filepath):
+    with open(filepath, 'r') as f:
         return f.read().strip()
 
-def normalize(text):
-    """Удаляет лишние пробелы и переносы строк для сравнения."""
-    return '\n'.join(line.strip() for line in text.splitlines() if line.strip())
+def normalize_stylish(output):
+    """Нормализует stylish-вывод для сравнения"""
+    lines = [line.strip() for line in output.splitlines() if line.strip()]
+    return '\n'.join(lines)
 
-@pytest.mark.parametrize("file1, file2, expected_output, format_name", [
-    (FILE1_JSON, FILE2_JSON, EXPECTED_STYLISH, 'stylish'),
-    (FILE1_YML, FILE2_YML, EXPECTED_STYLISH, 'stylish'),
-    (FILE1_JSON, FILE2_JSON, EXPECTED_PLAIN, 'plain'),
-    (FILE1_YML, FILE2_YML, EXPECTED_PLAIN, 'plain'),
-    (FILE1_JSON, FILE2_JSON, EXPECTED_JSON, 'json'),
-    (FILE1_YML, FILE2_YML, EXPECTED_JSON, 'json'),
-])
-def test_gendiff(file1, file2, expected_output, format_name):
-    expected = normalize(read_file(expected_output))
-    result = normalize(generate_diff(file1, file2, format_name))
-    assert result == expected, (
-        f"Формат: {format_name}\n"
-        f"Файлы: {file1}, {file2}\n"
-        f"Ожидаемый вывод:\n{expected}\n"
-        f"Фактический вывод:\n{result}"
-    )
+test_cases = [
+    ('file1.json', 'file2.json', 'expected_output_stylish.txt', 'stylish'),
+    ('file1.yml', 'file2.yml', 'expected_output_stylish.txt', 'stylish'),
+    ('file1.json', 'file2.json', 'expected_output_plain.txt', 'plain'),
+    ('file1.yml', 'file2.yml', 'expected_output_plain.txt', 'plain'),
+    ('file1.json', 'file2.json', 'expected_output_json.txt', 'json'),
+    ('file1.yml', 'file2.yml', 'expected_output_json.txt', 'json')
+]
+
+@pytest.mark.parametrize("file1, file2, expected_file, format_name", test_cases)
+def test_gendiff(file1, file2, expected_file, format_name):
+    file1_path = get_path(file1)
+    file2_path = get_path(file2)
+    expected_path = get_path(expected_file)
+    
+    expected = read_file(expected_path)
+    result = generate_diff(file1_path, file2_path, format_name).strip()
+
+    if format_name == 'json':
+        assert json.loads(result) == json.loads(expected)
+    elif format_name == 'plain':
+        assert result.splitlines() == expected.splitlines()
+    else:  # stylish format
+        assert normalize_stylish(result) == normalize_stylish(expected)

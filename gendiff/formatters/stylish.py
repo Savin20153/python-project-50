@@ -24,6 +24,8 @@ def format_stylish(diff, indent=0):
             val = stringify(node['value'], indent + 1)
             lines.append(f"{space}  - {key}: {val}")
 
+    if indent == 0:
+        return '{\n' + '\n'.join(lines) + '\n}'
     return '\n'.join(lines)
 
 
@@ -39,4 +41,6 @@ def stringify(value, indent):
         return str(value).lower()
     elif value is None:
         return 'null'
+    elif value == '':  
+        return ''
     return str(value)
