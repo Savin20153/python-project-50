@@ -1,7 +1,7 @@
 import pytest
 import json
 import os
-from gendiff.generator import generate_diff
+from gendiff.gendiff import generate_diff
 
 def get_path(filename):
     current_dir = os.path.dirname(os.path.abspath(__file__))
