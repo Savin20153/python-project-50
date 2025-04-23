@@ -18,7 +18,7 @@ def format_json(diff):
             else:
                 return {
                     'type': node['type'],
-                    'value': walk(node['value'])
+                    'value': walk(node.get('value', node.get('children')))
                 }
         elif isinstance(node, dict):
             return {k: walk(v) for k, v in node.items()}
