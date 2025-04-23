@@ -3,6 +3,8 @@
 
 [![Python CI](https://github.com/Savin20153/python-project-50/actions/workflows/main.yml/badge.svg)](https://github.com/Savin20153/python-project-50/actions/workflows/main.yml)
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Savin20153_python-project-50&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Savin20153_python-project-50)
+
 # gendiff
 
 gendiff - is a program that looks for the differences between the two.json or yaml formats and displays the result on the screen
